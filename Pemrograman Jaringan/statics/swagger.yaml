@@ -1,0 +1,65 @@
+openapi: 3.0.0
+info:
+  title: KUIS MUSIK
+  description: Kuis Musik Untuk Musisi Terbaik!!!
+  version: 1.0.0
+servers:
+  - url: 'http://localhost:8000'
+paths:
+  /questions:
+    get:
+      summary: "Mendapatkan daftar pertanyaan"
+      responses:
+        '200':
+          description: "Daftar pertanyaan"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  q1:
+                    type: string
+                  q2:
+                    type: string
+                  q3:
+                    type: string
+                  q4:
+                    type: string
+                  q5:
+                    type: string
+                  q6:
+                    type: string
+                  q7:
+                    type: string
+                  q8:
+                    type: string
+                  q9:
+                    type: string
+                  q10:
+                    type: string
+  /questions/{question_id}:
+    get:
+      summary: "Mendapatkan pertanyaan berdasarkan ID"
+      parameters:
+        - name: question_id
+          in: path
+          required: true
+          description: "ID pertanyaan"
+          schema:
+            type: string
+      responses:
+        '200':
+          description: "Pertanyaan berdasarkan ID"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  question_id:
+                    type: string
+                    example: "q1"
+                  answer:
+                    type: string
+                    example: "Gitar"
+        '404':
+          description: "Pertanyaan tidak ditemukan"

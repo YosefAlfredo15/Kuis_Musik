@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KUIS MUSIK</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            color: #333;
+        }
+        .question-container {
+            margin-bottom: 20px;
+            padding: 20px;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            display: none; /* Mulai dengan tersembunyi */
+        }
+        .question {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        .answers label {
+            display: block;
+            margin: 5px 0;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .answers input[type="radio"] {
+            margin-right: 10px;
+        }
+        .answers label:hover {
+            background-color: #eee;
+        }
+        .feedback {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        .feedback.correct {
+            color: green;
+        }
+        .feedback.incorrect {
+            color: red;
+        }
+        .btn-show-answers,
+        .btn-next,
+        .btn-back {
+            margin-top: 20px;
+            padding: 10px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .btn-show-answers {
+            background-color: #007BFF;
+            color: #fff;
+        }
+        .btn-show-answers:hover {
+            background-color: #0056b3;
+        }
+        .btn-next {
+            background-color: #007BFF;
+            color: #fff;
+        }
+        .btn-next:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        .btn-next:hover:not(:disabled) {
+            background-color: #0056b3;
+        }
+        .btn-back {
+            background-color: #6c757d;
+            color: #fff;
+        }
+        .btn-back:hover {
+            background-color: #5a6268;
+        }
+    </style>
+
+    <!-- Integrasi Web Soket -->
+     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const socket = io();
+
+            // Menangani koneksi WebSocket
+            socket.on('connect', function() {
+                console.log('Connected to server');
+            });
+
+            socket.on('disconnect', function() {
+                console.log('Disconnected from server');
+            });
+
+            // Menangani pesan dari server
+            socket.on('message', function(data) {
+                console.log(data.data);
+            });
+
+            // Menangani hasil jawaban
+            socket.on('answer_result', function(data) {
+                const feedbackElement = document.querySelector(`#feedback${data.question_id}`);
+                const errorElement = document.getElementById('error-message');
+
+                if (data.error) {
+                    feedbackElement.textContent = '';
+                    errorElement.textContent = data.error;
+                } else {
+                    errorElement.textContent = '';
+                    feedbackElement.textContent = data.result;
+                    feedbackElement.className = `feedback ${data.result.toLowerCase()}`;
+                }
+            });
+
+            // Fungsi untuk mengirimkan jawaban ke server
+            function submitAnswer(questionId, answer) {
+                socket.emit('submit_answer', { question_id: questionId, answer: answer });
+            }
+
+            // Logika navigasi dan tampilan
+            let currentQuestionIndex = 0;
+            const questionContainers = document.querySelectorAll('.question-container');
+            const nextButton = document.getElementById('next-question');
+            const prevButton = document.getElementById('prev-question');
+            const showAnswersButton = document.getElementById('lihat-jawaban');
+
+            function showQuestion(index) {
+                questionContainers.forEach((container, i) => {
+                    container.style.display = i === index ? 'block' : 'none';
+                });
+            }
+
+            nextButton.addEventListener('click', function() {
+                if (currentQuestionIndex < questionContainers.length - 1) {
+                    currentQuestionIndex++;
+                    showQuestion(currentQuestionIndex);
+                }
+                if (currentQuestionIndex === questionContainers.length - 1) {
+                    showAnswersButton.style.display = 'block';
+                }
+            });
+
+            prevButton.addEventListener('click', function() {
+                if (currentQuestionIndex > 0) {
+                    currentQuestionIndex--;
+                    showQuestion(currentQuestionIndex);
+                }
+                showAnswersButton.style.display = 'none';
+            });
+
+            showQuestion(currentQuestionIndex);
+        });
+    </script>
+
+
+</head>
+<body>
+    <h1>(Chapter 1)</h1>
+
+    <div id="questions-container">
+        <!-- Pertanyaan 1 -->
+        <div class="question-container" id="q1">
+            <div class="question">1. Alat musik apa yang dimainkan dengan cara dipetik?</div>
+            <div class="answers">
+                <label><input type="radio" name="q1" value="Drum" onclick="selectAnswer('q1', 'Drum')">Drum</label>
+                <label><input type="radio" name="q1" value="Piano" onclick="selectAnswer('q1', 'Piano')">Piano</label>
+                <label><input type="radio" name="q1" value="Suling" onclick="selectAnswer('q1', 'Suling')">Suling</label>
+                <label><input type="radio" name="q1" value="Gitar" onclick="selectAnswer('q1', 'Gitar')">Gitar</label>
+            </div>
+        </div>
+
+        <!-- Pertanyaan 2 -->
+        <div class="question-container" id="q2">
+            <div class="question">2. Alat musik apa yang dimainkan dengan cara dipukul?</div>
+            <div class="answers">
+                <label><input type="radio" name="q2" value="Suling" onclick="selectAnswer('q2', 'Suling')">Suling</label>
+                <label><input type="radio" name="q2" value="Gendang" onclick="selectAnswer('q2', 'Gendang')">Gendang</label>
+                <label><input type="radio" name="q2" value="Saxophone" onclick="selectAnswer('q2', 'Saxophone')">Saxophone</label>
+                <label><input type="radio" name="q2" value="Biola" onclick="selectAnswer('q2', 'Biola')">Biola</label>
+            </div>
+        </div>
+
+        <!-- Pertanyaan 3 -->
+        <div class="question-container" id="q3">
+            <div class="question">3. Alat musik apa yang dimainkan dengan cara digesek?</div>
+            <div class="answers">
+                <label><input type="radio" name="q3" value="Biola" onclick="selectAnswer('q3', 'Biola')">Biola</label>
+                <label><input type="radio" name="q3" value="Harmonika" onclick="selectAnswer('q3', 'Harmonika')">Harmonika</label>
+                <label><input type="radio" name="q3" value="Angklung" onclick="selectAnswer('q3', 'Angklung')">Angklung</label>
+                <label><input type="radio" name="q3" value="Semua Salah" onclick="selectAnswer('q3', 'Semua Salah')">Semua Salah</label>
+            </div>
+        </div>
+
+        <!-- Pertanyaan 4 -->
+        <div class="question-container" id="q4">
+            <div class="question">4. Alat musik apa yang dimainkan dengan cara tiup?</div>
+            <div class="answers">
+                <label><input type="radio" name="q4" value="Suling" onclick="selectAnswer('q4', 'Suling')">Suling</label>
+                <label><input type="radio" name="q4" value="Terumpet" onclick="selectAnswer('q4', 'Terumpet')">Terumpet</label>
+                <label><input type="radio" name="q4" value="Saxophone" onclick="selectAnswer('q4', 'Saxophone')">Saxophone</label>
+                <label><input type="radio" name="q4" value="Semua Benar" onclick="selectAnswer('q4', 'Semua Benar')">Semua Benar</label>
+            </div>
+        </div>
+
+        <!-- Pertanyaan 5 -->
+        <div class="question-container" id="q5">
+            <div class="question">5. Bagaimana cara bermain alat musik pianika?</div>
+            <div class="answers">
+                <label><input type="radio" name="q5" value="Ditiup dan Dipukul" onclick="selectAnswer('q5', 'Ditiup dan Dipukul')">Ditiup dan Dipukul</label>
+                <label><input type="radio" name="q5" value="Ditiup dan Dipetik" onclick="selectAnswer('q5', 'Ditiup dan Dipetik')">Ditiup dan Dipetik</label>
+                <label><input type="radio" name="q5" value="Ditiup dan Ditekan" onclick="selectAnswer('q5', 'Ditiup dan Ditekan')">Ditiup dan Ditekan</label>
+                <label><input type="radio" name="q5" value="Digesek dan Ditekan" onclick="selectAnswer('q5', 'Digesek dan Ditekan')">Digesek dan Ditekan</label>
+            </div>
+        </div>
+
+        <!-- Pertanyaan chapter 2 -->
+        <div class="question-container" id="q6" style="display: none;">
+    <div class="question">1. Gambar di bawah ini adalah kunci?</div>
+    <img src="/statics/images/C.png" alt="Kunci Gitar" style="max-width: 100%; height: auto; margin-bottom: 10px;">
+
+    <div class="answers">
+        <label><input type="radio" name="q6" value="Kunci A" onclick="selectAnswer('q6', 'Kunci A')">Kunci A</label>
+        <label><input type="radio" name="q6" value="Kunci B" onclick="selectAnswer('q6', 'Kunci B')">Kunci B</label>
+        <label><input type="radio" name="q6" value="Kunci C" onclick="selectAnswer('q6', 'Kunci C')">Kunci C</label>
+        <label><input type="radio" name="q6" value="Kunci D" onclick="selectAnswer('q6', 'Kunci D')">Kunci D</label>
+    </div>
+</div>
+
+<div class="question-container" id="q7" style="display: none;">
+    <div class="question">2. Gambar di bawah ini adalah kunci?</div>
+    <img src="/statics/images/Em.jpg" alt="Kunci Gitar" style="max-width: 300px; height: auto; margin-bottom: 10px;">
+
+
+    <div class="answers">
+        <label><input type="radio" name="q7" value="Kunci A" onclick="selectAnswer('q7', 'Kunci A')">Kunci A</label>
+        <label><input type="radio" name="q7" value="Kunci C" onclick="selectAnswer('q7', 'Kunci C')">Kunci C</label>
+        <label><input type="radio" name="q7" value="Kunci Em" onclick="selectAnswer('q7', 'Kunci Em')">Kunci E minor</label>
+        <label><input type="radio" name="q7" value="Kunci Am" onclick="selectAnswer('q7', 'Kunci Am')">Kunci A minor</label>
+    </div>
+</div>
+
+<div class="question-container" id="q8" style="display: none;">
+    <div class="question">3. Gambar di bawah ini adalah kunci?</div>
+    <img src="/statics/images/D.jpg" alt="Kunci Gitar" style="max-width: 300px; height: auto; margin-bottom: 10px;">
+
+    <div class="answers">
+        <label><input type="radio" name="q8" value="Kunci D" onclick="selectAnswer('q8', 'Kunci D')">Kunci D</label>
+        <label><input type="radio" name="q8" value="Kunci C" onclick="selectAnswer('q8', 'Kunci C')">Kunci C</label>
+        <label><input type="radio" name="q8" value="Kunci G" onclick="selectAnswer('q8', 'Kunci G')">Kunci G</label>
+        <label><input type="radio" name="q8" value="Kunci Am" onclick="selectAnswer('q8', 'Kunci Am')">Kunci A minor</label>
+    </div>
+</div>
+
+<div class="question-container" id="q9" style="display: none;">
+    <div class="question">4. Gambar di bawah ini adalah kunci?</div>
+    <img src="/statics/images/Am.png" alt="Kunci Gitar" style="max-width: 100%; height: auto; margin-bottom: 10px;">
+
+    <div class="answers">
+        <label><input type="radio" name="q9" value="Kunci D" onclick="selectAnswer('q9', 'Kunci D')">Kunci D</label>
+        <label><input type="radio" name="q9" value="Kunci C" onclick="selectAnswer('q9', 'Kunci C')">Kunci C</label>
+        <label><input type="radio" name="q9" value="Kunci G" onclick="selectAnswer('q9', 'Kunci G')">Kunci G</label>
+        <label><input type="radio" name="q9" value="Kunci Am" onclick="selectAnswer('q9', 'Kunci Am')">Kunci A minor</label>
+    </div>
+</div>
+
+<div class="question-container" id="q10" style="display: none;">
+    <div class="question">5. Gambar di bawah ini adalah kunci?</div>
+    <img src="/statics/images/G.jpg" alt="Kunci Gitar" style="max-width: 300px; height: auto; margin-bottom: 10px;">
+
+    <div class="answers">
+        <label><input type="radio" name="q10" value="Kunci D" onclick="selectAnswer('q10', 'Kunci D')">Kunci D</label>
+        <label><input type="radio" name="q10" value="Kunci C" onclick="selectAnswer('q10', 'Kunci C')">Kunci C</label>
+        <label><input type="radio" name="q10" value="Kunci G" onclick="selectAnswer('q10', 'Kunci G')">Kunci G</label>
+        <label><input type="radio" name="q10" value="Kunci Am" onclick="selectAnswer('q10', 'Kunci Am')">Kunci A minor</label>
+    </div>
+</div>
+
+<button class="btn-back" onclick="navigate(-1)" style="display: none;">Kembali</button>
+<button class="btn-next" onclick="navigate(1)" disabled>Next</button>
+<button class="btn-show-answers" onclick="showAnswers()" style="display: none;">Lihat Jawaban</button>
+
+<div id="feedback-container"></div>
+
+<script>
+const correctAnswers = {
+    q1: 'Gitar',
+    q2: 'Gendang',
+    q3: 'Biola',
+    q4: 'Semua Benar',
+    q5: 'Ditiup dan Ditekan',
+    q6: 'Kunci C',
+    q7: 'Kunci Em',
+    q8: 'Kunci D',
+    q9: 'Kunci Am',
+    q10: 'Kunci G'
+};
+
+let selectedAnswers = {};
+let currentQuestionIndex = 0;
+const questionIds = {
+    0: ['q1', 'q2', 'q3', 'q4', 'q5'],
+    1: ['q6', 'q7','q8','q9','q10']
+};
+const chapters = ['Chapter 1', 'Chapter 2'];
+let currentChapter = 0;
+
+function selectAnswer(questionId, answer) {
+    if (!selectedAnswers[questionId]) {
+        selectedAnswers[questionId] = answer;
+    }
+    
+    // Menonaktifkan semua opsi radio untuk pertanyaan ini
+    document.querySelectorAll(`input[name=${questionId}]`).forEach(input => {
+        input.disabled = true;
+    });
+
+    // Memeriksa apakah semua pertanyaan telah dijawab
+    checkAllAnswered();
+    
+    // Memungkinkan tombol "Next" jika ada opsi yang dipilih
+    enableNextButton();
+}
+
+function navigate(direction) {
+    const currentQuestion = document.getElementById(questionIds[currentChapter][currentQuestionIndex]);
+    currentQuestion.style.display = 'none';
+
+    currentQuestionIndex += direction;
+
+    // Memastikan indeks berada dalam rentang yang valid
+    if (currentQuestionIndex < 0) {
+        currentQuestionIndex = 0;
+    } else if (currentQuestionIndex >= questionIds[currentChapter].length) {
+        currentQuestionIndex = questionIds[currentChapter].length - 1;
+    }
+
+    const nextQuestion = document.getElementById(questionIds[currentChapter][currentQuestionIndex]);
+    nextQuestion.style.display = 'block';
+
+    // Menampilkan atau menyembunyikan tombol navigasi
+    document.querySelector('.btn-back').style.display = currentQuestionIndex === 0 ? 'none' : 'inline-block';
+    const isLastQuestionInChapter = (currentQuestionIndex === questionIds[currentChapter].length - 1);
+    document.querySelector('.btn-next').style.display = isLastQuestionInChapter ? 'none' : 'inline-block';
+    document.querySelector('.btn-show-answers').style.display = isLastQuestionInChapter && Object.keys(selectedAnswers).length === questionIds[currentChapter].length ? 'inline-block' : 'none';
+
+    // Memungkinkan tombol "Next" jika ada opsi yang dipilih
+    enableNextButton();
+}
+
+function enableNextButton() {
+    const currentQuestionId = questionIds[currentChapter][currentQuestionIndex];
+    const anyOptionSelected = Array.from(document.querySelectorAll(`input[name=${currentQuestionId}]`)).some(input => input.checked);
+    document.querySelector('.btn-next').disabled = !anyOptionSelected;
+}
+
+function showAnswers() {
+    const feedbackContainer = document.getElementById('feedback-container');
+    feedbackContainer.innerHTML = '';
+
+    // Menampilkan umpan balik untuk setiap jawaban yang dipilih
+    for (const [questionId, selectedAnswer] of Object.entries(selectedAnswers)) {
+        const correctAnswer = correctAnswers[questionId];
+        const feedback = document.createElement('div');
+        feedback.className = 'feedback';
+        feedback.textContent = `Pertanyaan ${questionId.slice(1)}: ${selectedAnswer === correctAnswer ? 'Jawaban Anda benar!' : 'Jawaban Anda salah. Jawaban yang benar adalah: ' + correctAnswer}`;
+        feedback.className = selectedAnswer === correctAnswer ? 'feedback correct' : 'feedback incorrect';
+        feedbackContainer.appendChild(feedback);
+    }
+
+    // Menampilkan tombol "Next Chapter" jika semua pertanyaan sudah dijawab
+    const btnShowAnswers = document.querySelector('.btn-show-answers');
+    btnShowAnswers.textContent = 'Next Chapter';
+    btnShowAnswers.onclick = navigateToNextChapter;
+}
+
+
+
+
+function navigateToNextChapter() {
+    if (currentChapter < chapters.length - 1) {
+        currentChapter++;
+        document.querySelector('h1').textContent = chapters[currentChapter];
+
+        // Menyembunyikan semua pertanyaan
+        document.querySelectorAll('.question-container').forEach(container => {
+            container.style.display = 'none';
+        });
+
+        selectedAnswers = {}; // Mengatur ulang jawaban yang dipilih untuk bab baru
+        currentQuestionIndex = 0;
+
+        const feedbackContainer = document.getElementById('feedback-container');
+        feedbackContainer.innerHTML = ''; // Menghapus umpan balik
+
+        // Menyembunyikan tombol "Lihat Jawaban"
+        document.querySelector('.btn-show-answers').style.display = 'none';
+
+        navigate(0); // Menampilkan pertanyaan pertama di bab berikutnya
+    }
+}
+
+
+function checkAllAnswered() {
+    if (Object.keys(selectedAnswers).length === questionIds[currentChapter].length) {
+        document.querySelector('.btn-show-answers').style.display = 'inline-block';
+    } else {
+        document.querySelector('.btn-show-answers').style.display = 'none';
+    }
+}
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    navigate(0); // Tampilkan pertanyaan pertama saat halaman dimuat
+});
+
+    </script>
+</body>
+</html>
