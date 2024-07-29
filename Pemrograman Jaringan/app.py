@@ -85,7 +85,7 @@ swaggerui_blueprint = get_swaggerui_blueprint(
     SWAGGER_URL,
     API_URL,
     config={
-        'app_name': "Polling/Q&A System API"
+        'app_name': "QnA Music"
     }
 )
 app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
